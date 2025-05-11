@@ -6,8 +6,9 @@
 #ifndef EKF_H
 #define EKF_H
 
-#include "math/quaternion.h"
 #include "math/matrix.h"
+#include "math/quaternion.h"
+#include "math/vector3f.h"
 
 /**
  * @brief EKF 상태 벡터 크기
@@ -230,5 +231,24 @@ Vector3f ekf_get_accel_bias(const EKF *ekf);
  * @return bool 리셋 성공 여부
  */
 bool ekf_reset(EKF *ekf);
+
+/**
+ * @brief 센서 샘플을 수집하여 자기장 벡터 초기화
+ * 
+ * @param ekf EKF 구조체 포인터
+ * @param mag_samples 자력계 샘플 배열
+ * @param accel_samples 가속도계 샘플 배열
+ * @param sample_count 샘플 개수
+ * @return bool 초기화 성공 여부
+ */
+bool ekf_initialize_magnetic_field(EKF *ekf, Vector3f *mag_samples, Vector3f *accel_samples, int sample_count);
+
+/**
+ * @brief 기본 자기장 값으로 초기화 (현장 측정이 불가능한 경우)
+ * 
+ * @param ekf EKF 구조체 포인터
+ * @return bool 초기화 성공 여부
+ */
+bool ekf_initialize_default_magnetic_field(EKF *ekf);
 
 #endif /* EKF_H */
