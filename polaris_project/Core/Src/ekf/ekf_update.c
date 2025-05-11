@@ -92,33 +92,25 @@ static bool ekf_compute_mag_jacobian(EKF *ekf, Matrix *H) {
     // 자세 사원수에 대한 자력계 측정의 자코비안 계산
     // dh/dq = d(R(q) * m_earth)/dq
     
-    // 사원수 회전 행렬의 편미분을 계산하여 자코비안 행렬 구성
-    // 소형 각도 가정(Small-angle approximation) 하에 대각 요소 R11, R22, R33은 1로 가정하고, 편미분 성분을 0으로 근사함.
-    // 계산 효율성과 수치적 안정성을 위해 간략화된 버전을 사용함.
-    // 로켓이 큰 각도로 회전하며 역동적으로 기동하는 경우를 고려해야 하거나,
-    // 테스트 결과 보다 정밀한 자세 추정 및 제어가 필요할 경우 보다 정확한 자세 추정을 위한
-    // 완전한 편미분 성분 계산을 사용해야 할 수 있음.
-    
-    // 자세 사원수에 대한 자력계 측정의 자코비안 (간략화된 버전)
     // qw에 대한 편미분
-    matrix_set(H, 0, EKF_STATE_QUAT_W, 2.0f * (my*qz - mz*qy));
-    matrix_set(H, 1, EKF_STATE_QUAT_W, 2.0f * (mz*qx - mx*qz));
-    matrix_set(H, 2, EKF_STATE_QUAT_W, 2.0f * (mx*qy - my*qx));
+    matrix_set(H, 0, EKF_STATE_QUAT_W, 2.0f * (- qz*my + qy*mz));
+    matrix_set(H, 1, EKF_STATE_QUAT_W, 2.0f * (qz*mx - qx*mz));
+    matrix_set(H, 2, EKF_STATE_QUAT_W, 2.0f * (- qy*mx + qx*my));
     
     // qx에 대한 편미분
-    matrix_set(H, 0, EKF_STATE_QUAT_X, 2.0f * (mx*qw + my*qy + mz*qz));
-    matrix_set(H, 1, EKF_STATE_QUAT_X, 2.0f * (my*qx - 2.0f*mx*qy + mz*qw));
-    matrix_set(H, 2, EKF_STATE_QUAT_X, 2.0f * (mz*qx - mx*qz - 2.0f*my*qw));
+    matrix_set(H, 0, EKF_STATE_QUAT_X, 2.0f * (qy*my + qz*mz));
+    matrix_set(H, 1, EKF_STATE_QUAT_X, 2.0f * (qy*mx - 2.0f*qx*my - qw*mz));
+    matrix_set(H, 2, EKF_STATE_QUAT_X, 2.0f * (qz*mx + qw*my - 2.0f*qx*mz));
     
     // qy에 대한 편미분
-    matrix_set(H, 0, EKF_STATE_QUAT_Y, 2.0f * (my*qx - 2.0f*mx*qy - mz*qw));
-    matrix_set(H, 1, EKF_STATE_QUAT_Y, 2.0f * (mx*qx + my*qw + mz*qz));
-    matrix_set(H, 2, EKF_STATE_QUAT_Y, 2.0f * (mz*qy + my*qz - 2.0f*mx*qw));
+    matrix_set(H, 0, EKF_STATE_QUAT_Y, 2.0f * (- 2.0f*qy*mx + qx*my + qw*mz));
+    matrix_set(H, 1, EKF_STATE_QUAT_Y, 2.0f * (qx*mx + qz*mz));
+    matrix_set(H, 2, EKF_STATE_QUAT_Y, 2.0f * (- qw*mx + qz*my - 2.0f*qy*mz));
     
     // qz에 대한 편미분
-    matrix_set(H, 0, EKF_STATE_QUAT_Z, 2.0f * (mz*qx + mx*qz - 2.0f*my*qw));
-    matrix_set(H, 1, EKF_STATE_QUAT_Z, 2.0f * (mz*qy - my*qz - 2.0f*mx*qw));
-    matrix_set(H, 2, EKF_STATE_QUAT_Z, 2.0f * (mx*qx + my*qy + mz*qw));
+    matrix_set(H, 0, EKF_STATE_QUAT_Z, 2.0f * (- 2.0f*qz*mx - qw*my + qx*mz));
+    matrix_set(H, 1, EKF_STATE_QUAT_Z, 2.0f * (qw*mx - 2.0f*qz*my + qy*mz));
+    matrix_set(H, 2, EKF_STATE_QUAT_Z, 2.0f * (qx*mx + qy*my));
     
     return true;
 }
